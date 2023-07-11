@@ -29,7 +29,7 @@
     rollableData.rollAction = rollActionInput.value;
   }
   function rollDamageTypeUpdated(): void {
-    const rollDamageTypeInput = document.getElementById('rollDamageType') as HTMLInputElement;
+    const rollDamageTypeInput = document.getElementById('rollDamageType') as HTMLSelectElement;
     rollableData.rollDamageType = rollDamageTypeInput.value;
   }
 
