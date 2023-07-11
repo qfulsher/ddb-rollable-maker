@@ -1,16 +1,18 @@
 <script lang="ts">
   const rollableStart = `[rollable]`;
   const rollableEnd = `[/rollable]`;
+  let displayTextPristine = true;
 
   const rollableData = {
-    displayText: 'Sneak Attack',
-    diceNotation: '3d6',
+    displayText: '1d8+3',
+    diceNotation: '1d8+3',
     rollType: 'roll',
     rollAction: undefined,
-    rollDamageType: "Bludgeoning"
+    rollDamageType: undefined
   };
 
   function displayTextUpdated(): void {
+    displayTextPristine = false;
     const displayTextInput = document.getElementById("displayText") as HTMLInputElement;
     rollableData.displayText = displayTextInput.value;
   }
@@ -18,11 +20,20 @@
   function diceRollUpdated(): void {
     const diceNotationInput = document.getElementById("diceNotation") as HTMLInputElement;
     rollableData.diceNotation = diceNotationInput.value;
+
+    if (displayTextPristine) {
+      rollableData.displayText = rollableData.diceNotation;
+    }
   }
 
   function rollTypeUpdated(): void {
     const rollTypeInput = document.getElementById('rollType') as HTMLSelectElement;
-    rollableData.rollType = rollTypeInput.value;
+    const rollType = rollTypeInput.value;
+    rollableData.rollType = rollType;
+
+    if (isToHitRoll) {
+      rollableData.diceNotation = '1d20'
+    }
   }
   function rollActionUpdated(): void {
     const rollActionInput = document.getElementById('rollAction') as HTMLInputElement;
@@ -35,13 +46,15 @@
 
   function buildRollableTag({displayText, ...rollData}): string {
     const jsonPart = JSON.stringify(rollData);
-    return `${rollableStart} (${displayText}); ${jsonPart} ${rollableEnd}`
+    return `${rollableStart} ${displayText}; ${jsonPart} ${rollableEnd}`
   }
 
-  $: rollableTag = buildRollableTag(rollableData)
+  $: rollableTag = buildRollableTag(rollableData);
+  $: damageTypeInputEnabled = rollableData.rollType == 'damage' || rollableData.rollType == 'spell';
+  $: isToHitRoll = rollableData.rollType == 'to hit';
 
-  function copy() {
-    navigator.clipboard.writeText(rollableTag);
+  async function copy() {
+    await navigator.clipboard.writeText(rollableTag);
   }
 
 </script>
@@ -51,13 +64,6 @@
 
   <form id="tagMakerForm">
     <fieldset>
-      <label for="displayText">Display Text</label>
-      <input bind:value={rollableData.displayText} on:keyup={displayTextUpdated} id="displayText"/>
-
-
-      <label for="diceNotation">Dice Roll (3d6+1)</label>
-      <input bind:value={rollableData.diceNotation} on:keyup={diceRollUpdated} id="diceNotation"/>
-
       <label for="rollType">Roll Type</label>
       <select bind:value={rollableData.rollType} id="rollType" on:change={rollTypeUpdated}>
         <option value="roll" title="used for a generic dice roll.">roll</option>
@@ -68,12 +74,19 @@
         <option value="save" title="used for saving throws.">save</option> 
         <option value="check" title="used for profiency checks (skills)">check</option>
       </select>
+      
+      <label for="diceNotation">Dice Roll (1d8+3)</label>
+      <input bind:value={rollableData.diceNotation} on:keyup={diceRollUpdated} id="diceNotation"/>
+      
+      <label for="displayText">Display Text</label>
+      <input bind:value={rollableData.displayText} on:keyup={displayTextUpdated} id="displayText"/>
 
       <label for="rollAction">Roll Action (Optional)</label>
       <input bind:value={rollableData.rollAction} on:keyup={rollActionUpdated} id="rollAction" placeholder="{rollableData.displayText}" />
 
       <label for="rollDamageType">Damage Type</label>
-      <select bind:value={rollableData.rollDamageType} on:change={rollDamageTypeUpdated} id="rollDamageType">
+      <select disabled={!damageTypeInputEnabled} bind:value={rollableData.rollDamageType} on:change={rollDamageTypeUpdated} id="rollDamageType">
+        <option value="">None</option>
         <option value="Bludgeoning">Bludgeoning</option>
         <option value="Acid">Acid</option>
         <option value="Cold">Cold</option>
