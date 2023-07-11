@@ -60,7 +60,7 @@
 </script>
 
 <main>  
-  <h1>D&DBeyond Rollable Tag Maker</h1>
+  <h1>D&DBeyond Rollable Tag Maker <a href="https://www.dndbeyond.com/forums/dungeons-dragons-discussion/homebrew-house-rules/106856-adding-rollable-tags-to-your-homebrew-monsters-for" class="minihelp">What is this?</a></h1>
 
   <form id="tagMakerForm">
     <fieldset>
@@ -124,6 +124,10 @@
   display: flex;
   flex-flow: column;
   text-align: left;
+}
+
+.minihelp {
+  font-size: 8px;
 }
 
 </style>
